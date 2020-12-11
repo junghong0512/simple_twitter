@@ -1,46 +1,54 @@
 import { dbService } from "fbase";
 import React, { useEffect, useState } from "react";
 
-const Home = () => {
-  const [tweet, setTweet] = useState("");
+const Home = ({ userObj }) => {
+  const [text, setText] = useState("");
   const [tweets, setTweets] = useState([]);
 
-  const getTweets = async () => {
-    const dbTweets = await dbService.collection("tweets").get();
-    dbTweets.forEach((document) => {
-      const tweetObj = {
-        ...document.data(),
-        id: document.id,
-      };
-      setTweets((prev) => [tweetObj, ...prev]);
-    });
-  };
+  //   const getTweets = async () => {
+  //     const dbTweets = await dbService.collection("tweets").get();
+  //     dbTweets.forEach((document) => {
+  //       const tweetObj = {
+  //         ...document.data(),
+  //         id: document.id,
+  //       };
+  //       setTweets((prev) => [tweetObj, ...prev]);
+  //     });
+  //   };
 
   useEffect(() => {
-    getTweets();
+    // getTweets();
+    dbService.collection("tweets").onSnapshot((snapshot) => {
+      const tweetArray = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setTweets(tweetArray);
+    });
   }, []);
 
   const onSubmit = async (event) => {
     event.preventDefault();
     await dbService.collection("tweets").add({
-      tweet,
+      text,
       createdAt: Date.now(),
+      creatorId: userObj.uid,
     });
-    setTweet("");
+    setText("");
   };
 
   const onChange = (event) => {
     const {
       target: { value },
     } = event;
-    setTweet(value);
+    setText(value);
   };
 
   return (
     <div>
       <form onSubmit={onSubmit}>
         <input
-          value={tweet}
+          value={text}
           onChange={onChange}
           type="text"
           placeholder="What's on your mind?"
@@ -51,7 +59,7 @@ const Home = () => {
       <div>
         {tweets.map((tweet) => (
           <div key={tweet.id}>
-            <h4>{tweet.tweet}</h4>
+            <h4>{tweet.text}</h4>
           </div>
         ))}
       </div>
