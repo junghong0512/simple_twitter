@@ -23,7 +23,7 @@ function App() {
       ) : (
         "Initializing..."
       )}
-      <footer>&copy; Firebase Twitter {new Date().getFullYear()}</footer>
+      {/* <footer>&copy; Firebase Twitter {new Date().getFullYear()}</footer> */}
     </>
   );
 }
